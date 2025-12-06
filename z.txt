@@ -1,1 +1,0 @@
-mongodb+srv://admin:admin123@cluster0.hpzuk3b.mongodb.net/Paytm
