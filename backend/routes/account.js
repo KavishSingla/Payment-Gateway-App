@@ -1,4 +1,6 @@
 const express = require("express");
+const mongoose = require("mongoose");
+const zod = require("zod");
 const { Account } = require("../db");
 const { authMiddleware } = require("../middleware");
 
@@ -22,13 +24,32 @@ router.get("/balance",authMiddleware,async (req, res) => {
 
 });
 
+const transferBody = zod.object({
+    to: zod.string().length(24, "Recipient ID must be a valid 24-character User ID."),
+    amount: zod.number().positive()
+});
 
 router.post("/transfer",authMiddleware,async (req, res) => {
-
     const session = await mongoose.startSession();
     session.startTransaction();
 
-   const {to , amount} = req.body;
+
+    const { success, data } = transferBody.safeParse({
+        to: req.body.to,
+        amount: parseFloat(req.body.amount) 
+    });
+
+    if (!success) {
+        await session.abortTransaction(); 
+        return res.status(400).json({
+            msg: "Invalid input format. Check amount and recipient ID length."
+        });
+    }
+
+    const { to, amount } = data;
+
+    
+   
    const account = await Account.findOne({userId:req.userId}).session(session);
 
     if(!account || account.balance < amount){

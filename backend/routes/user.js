@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const { authMiddleware } = require("../middleware");
 
 const router  = express.Router();
-app.use(express.json());
 
 
 const signupBody = zod.object({
@@ -14,12 +13,12 @@ const signupBody = zod.object({
 	firstName: zod.string(),
 	lastName: zod.string(),
 	password: zod.string()
-})
+}).strict();
 
 const signinBody = zod.object({
     username: zod.string().email(),
 	password: zod.string()
-})
+}).strict();
 
 router.post("/signup", async (req, res) => {
     
@@ -56,7 +55,7 @@ router.post("/signup", async (req, res) => {
         balance: Number((1 + Math.random() * 10000).toFixed(2))
     })
 
-    const token = jwt.sign({userId , JWT_SECRET});
+    const token = jwt.sign({userId} , JWT_SECRET);
     res.json({
         msg:"user created successfully",
         token : token
@@ -81,6 +80,14 @@ router.post("/signin",async (req, res) => {
         username,
         password
     })
+
+     if(!user){
+       
+        return res.status(400).json({
+            msg:"No user found, signup first"
+        })
+        
+    }
 
     if(user){
         const token = jwt.sign({userId:user._id} ,JWT_SECRET)
