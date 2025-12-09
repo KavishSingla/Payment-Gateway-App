@@ -1,12 +1,53 @@
-import { Heading } from "../components/Heading";
-import { SubHeading } from "../components/SubHeading";
+import { useState } from "react"
+import { BottomWarning } from "../components/BottomWarning"
+import { Button } from "../components/Button"
+import { Heading } from "../components/Heading"
+import { InputBox } from "../components/InputBox"
+import { SubHeading } from "../components/SubHeading"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+
+export const Signin = () => {
+
+  const [username , setUsername] = useState("");
+  const [password , setPassword] = useState("");
+  const navigate = useNavigate();
+
+    return <div className="bg-slate-300 h-screen flex justify-center">
+    <div className="flex flex-col justify-center w-lg">
+      <div className="rounded-lg bg-white  w-full text-center p-4 h-max px-4">
+        <Heading label={"Sign In"} />
+        <SubHeading label={"Enter your credentials to access your account"} />
+
+        <InputBox onChange={(e)=>{
+          setUsername(e.target.value);
+        }} placeholder="example@gmail.com" label={"Email"} />
 
 
-export function Signin() {
-    return (
-        <div>
-        <Heading label="hello"></Heading>
-        <SubHeading label = "Enter your information to create an account"></SubHeading>
+        <InputBox onChange={(e)=>{
+          setPassword(e.target.value);
+        }} placeholder="123456" label={"Password"} />
+
+
+        <div className="pt-4 ">
+          <Button onClick = {async()=>{
+            const response = await axios.post("http://localhost:3000/api/v1/user/signin",{
+              username,
+              password
+            })
+            localStorage.setItem("token", response.data.token)
+            navigate("/dashboard")
+            
+          }} label={"Sign  In"} />
+
+
+          
         </div>
-    )     
+        <BottomWarning label={"Don't have an account?"} buttonText={"Sign Up"} to={"/signup"} />
+      </div>
+    </div>
+  </div>
 }
+
+
+
